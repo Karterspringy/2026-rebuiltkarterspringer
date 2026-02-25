@@ -29,9 +29,9 @@ public class ShooterSubsystem extends SubsystemBase {
     //Instantiating Classes
     public Vision  vision  = new Vision();
 
-    //Interpolation Table Instantiation
-    // public double shootLerpSpeed = 0.0;
-    // public final InterpolatingDoubleTreeMap shootLerp = new InterpolatingDoubleTreeMap();
+    // Interpolation Table Instantiation
+    public double shootLerpSpeed = 0.0;
+    public final InterpolatingDoubleTreeMap shootLerp = new InterpolatingDoubleTreeMap();
     // Feeding Motor
     // private static TalonFX feedermoter;
 
@@ -88,26 +88,26 @@ public class ShooterSubsystem extends SubsystemBase {
         // shootLerpSpeed = shootLerp.get(vision.getDist() / 12);
 
     }
-    // private void configShooterSubsys() {
-    // // Interpolation table config
-    // shootLerp.put(1.0, 0.57);
-    // shootLerp.put(2.0, 0.59);
-    // shootLerp.put(3.0, 0.61);
-    // shootLerp.put(4.0, 0.63);
-    // shootLerp.put(5.0, 0.65);
-    // shootLerp.put(6.0, 0.67);
-    // shootLerp.put(7.0, 0.69);
-    // shootLerp.put(8.0, 0.71);
-    // shootLerp.put(9.0, 0.73); 
-    // shootLerp.put(10.0,0.75);
-    // shootLerp.put(11.0,0.77);
-    // shootLerp.put(12.0,0.79);
-    // shootLerp.put(13.0,0.81);
-    // shootLerp.put(14.0,0.83);
-    // shootLerp.put(15.0,0.85);
-    // shootLerp.put(16.0,0.87);
-    // shootLerp.put(17.0,0.89);
-    // shootLerp.put(18.0,0.9);
-    // }
+    private void configShooterSubsys() {
+    // Interpolation table config
+    shootLerp.put(1.0, 0.57);
+    shootLerp.put(2.0, 0.59);
+    shootLerp.put(3.0, 0.61);
+    shootLerp.put(4.0, 0.63);
+    shootLerp.put(5.0, 0.65);
+    shootLerp.put(6.0, 0.67);
+    shootLerp.put(7.0, 0.69);
+    shootLerp.put(8.0, 0.71);
+    shootLerp.put(9.0, 0.73); 
+    shootLerp.put(10.0,0.75);
+    shootLerp.put(11.0,0.77);
+    shootLerp.put(12.0,0.79);
+    shootLerp.put(13.0,0.81);
+    shootLerp.put(14.0,0.83);
+    shootLerp.put(15.0,0.85);
+    shootLerp.put(16.0,0.87);
+    shootLerp.put(17.0,0.89);
+    shootLerp.put(18.0,0.9);
+    }
 
 }

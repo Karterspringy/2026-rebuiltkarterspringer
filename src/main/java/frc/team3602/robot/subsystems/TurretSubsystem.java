@@ -49,7 +49,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     // Controllers *These PID values need to be changed*
     private final PIDController turretController = new PIDController(.1, 0.0, 0.0026);
-    private final PIDController aimController = new PIDController(.00, 0.0, 0);
+    private final PIDController aimController = new PIDController(.04, 0.0, 0);
 
     private final Feedforwards aimFf = new Feedforwards(0);
 
@@ -96,19 +96,11 @@ public class TurretSubsystem extends SubsystemBase {
         });
     }
 
-//Ball Velocity
-public double ballVelocity() {
-    /*Ball Velocity = Motor Speed *  */
-    double ballv = 1 * Math.PI * 4;
-    return ballv;
-}    
-
-//Calculating amount of Time the Ball is in the air
 public double calculateBallTimeOfFlight() {
-    //Ball Velocity m/s
-    double ballVelocity = ballVelocity();
+    //Ball Velocity m/s TODO: Must Change
+    double ballVelocity = 1;
     //Ball Launch Angle degrees TODO: Must Change
-    double launchAngleDegrees = 35;
+    double launchAngleDegrees = 15;
     //Shooter Height meters
     double shooterHeight = 0.4826;
     //Target Height meters
@@ -137,8 +129,7 @@ public double calculateBallTimeOfFlight() {
     return ballTimeOfFlight;
 }
 
-//Calculating the Robot Velocity offset of the turret
-public double velocityTurretOffset() {
+public double calculateTurretOffset() {
     //Pull RobotVelocity m/s
     double robotVelocity = drivetrainSubsys.getState().Speeds.vxMetersPerSecond;
 
@@ -149,21 +140,10 @@ public double velocityTurretOffset() {
     double lateralMovement = robotVelocity * timeOfFlight;
     
     // Calculate the angle offset using arctan
-    double offsetRadians = Math.atan2(lateralMovement, vision.getDist() * 0.0254);
+    double offsetRadians = Math.atan2(lateralMovement, vision.getDist());
     
     // Convert to degrees if needed (most turret code uses degrees)
     return Math.toDegrees(offsetRadians);
-}
-
-public double rotationTurretOffset() {
-    double targetDistance = vision.getDist() * 0.0254;
-
-    double xdegrees = Math.asin(11.68 / targetDistance);
-
-    double rotationOffset = 90 - xdegrees;
-
-    return rotationOffset;
-
 }
 
 
@@ -171,20 +151,26 @@ public double rotationTurretOffset() {
 
     double aimOutput;
 
+    public Command testTrack() {
+        return run(() -> {
+                aimOutput = aimController.calculate(vision.getTurretTX(),0);
+                setAngle = setAngle - aimOutput;
+        });
+    }
+
     public Command track() {
         return run(() -> {
             if (vision.getTurretHasTarget()) {
                 aimOutput = aimController.calculate(vision.getTurretTX(),0);
-                setAngle = setAngle - aimOutput;
+                setAngle = setAngle - aimOutput + calculateTurretOffset() ;
             }
             setAngle = turnFeedforward() + setAngle; // Adds rotational feedforward
             voltage = turretController.calculate(getEncoder(), setAngle);
-            if (voltage > 1) {  //TODO: create constant for 2, do not go higher than 2
-                voltage = 1;
-            } else if (voltage < -1) {
-                voltage = -1;
-            }
-            turretMotor.setVoltage(voltage);
+            if (voltage > 4) {  //TODO: create constant for 2, do not go higher than 2
+                voltage = 4;
+            } else if (voltage < -4) {
+                voltage = -4;
+            }            turretMotor.setVoltage(voltage);
         }
 
         );

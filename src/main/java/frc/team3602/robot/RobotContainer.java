@@ -91,6 +91,7 @@ public class RobotContainer {
                 ));
         joystick.a().whileTrue(spindexer.setFasterSpindexerReceive()).onFalse(spindexer.stopSpindexer());
         joystick.b().whileTrue(shooter.setShootVoltage(8)).onFalse(shooter.stopShooter());
+        joystick.x().whileTrue(turret.testTrack());
         joystick.povRight().whileTrue(turret.setAngle(10));
         joystick.povLeft().whileTrue(turret.setAngle(-10));
         //joystick.povDown().whileTrue(turret.testTurret(0));
@@ -105,8 +106,8 @@ public class RobotContainer {
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // Reset the field-centric heading on left bumper press.
         // joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));

@@ -39,8 +39,6 @@ public class Superstructure {
                 return Commands.parallel(
                     turretSubsys.track(),
                 Commands.sequence(
-                    if(vision.getHasTarget()) 
-                    return 
                     shooterSubsys.setShootVoltage(12).withTimeout(1.28).andThen(spindexerSubsys.setSpindexerReceive())
                 )
                 );
