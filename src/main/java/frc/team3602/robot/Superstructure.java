@@ -13,6 +13,7 @@ import frc.team3602.robot.Constants.ShooterConstants;
 import frc.team3602.robot.Constants.spindexerConstants;
 import frc.team3602.robot.subsystems.CommandSwerveDrivetrain;
 import frc.team3602.robot.subsystems.IntakeSubsystem;
+import frc.team3602.robot.subsystems.PivotSubsystem;
 import frc.team3602.robot.subsystems.ShooterSubsystem;
 import frc.team3602.robot.subsystems.SpindexerSubsystem;
 import frc.team3602.robot.subsystems.TurretSubsystem;
@@ -25,13 +26,15 @@ public class Superstructure {
     public TurretSubsystem turretSubsys;
     public CommandSwerveDrivetrain commandSwerveDrivetrainsubsys;
     public Vision vision;
+    public PivotSubsystem pivotSubsys;
 
      public Superstructure(IntakeSubsystem intakeSubsys, ShooterSubsystem shooterSubsys, SpindexerSubsystem spindexerSubsys,
-            TurretSubsystem turretSubsys, CommandSwerveDrivetrain commandSwerveDrivetrainSubsys) {
+            TurretSubsystem turretSubsys, CommandSwerveDrivetrain commandSwerveDrivetrainSubsys, PivotSubsystem pivotsubsys) {
         this.intakeSubsys = intakeSubsys;
         this.shooterSubsys = shooterSubsys;
         this.spindexerSubsys = spindexerSubsys;
         this.turretSubsys = turretSubsys;
+        this.pivotSubsys = pivotsubsys;
             }
 
         /*Score Commands*/
@@ -45,11 +48,11 @@ public class Superstructure {
             }
             //Intake
          public Command IntakeBall() {
-        return intakeSubsys.dropIntake().andThen(intakeSubsys.setIntakeSpeed().withTimeout(0.2));
+        return pivotSubsys.dropIntake().andThen(intakeSubsys.setIntakeSpeed().withTimeout(0.2));
     }
         
         public Command StopIntake() {
-            return intakeSubsys.raiseIntake().andThen(intakeSubsys.stopIntake());
+            return pivotSubsys.raiseIntake().andThen(intakeSubsys.stopIntake());
         }
          
         public Command OutakeBall() {

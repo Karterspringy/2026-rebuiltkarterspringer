@@ -130,33 +130,41 @@ public double calculateBallTimeOfFlight() {
 }
 
 public double calculateTurretOffset() {
-    //Pull RobotVelocity m/s
+    // Pull Robot Velocity m/s (positive = moving forward)
     double robotVelocity = drivetrainSubsys.getState().Speeds.vxMetersPerSecond;
-
-    //Pull Time of Flight Calculation
+    
+    // Pull Time of Flight Calculation (seconds)
     double timeOfFlight = this.calculateBallTimeOfFlight();
-
-    // Calculate the lateral distance the robot moves during flight
-    double lateralMovement = robotVelocity * timeOfFlight;
     
-    // Calculate the angle offset using arctan
-    double offsetRadians = Math.atan2(lateralMovement, vision.getDist());
+    // Get distance to target (meters)
+    double angle = Math.toRadians(vision.getTY() + vision.getTurretIMUPitch());
+    double distanceToTag = distance =(44.21875 - 15.625) / Math.tan(angle);
     
-    // Convert to degrees if needed (most turret code uses degrees)
-    return Math.toDegrees(offsetRadians);
+    // Get the current angle to the tag relative to robot forward (degrees)
+    double tagYawDegrees = vision.getTY();
+    
+    // Lateral movement = how far the robot moves sideways during flight
+    double lateralMovement = robotVelocity * timeOfFlight; // meters
+    
+    // Calculate angular offset using arctan
+    double leadRadians = Math.atan2(lateralMovement, distanceToTag);
+    
+    // Convert lead to degrees
+    double leadDegrees = Math.toDegrees(leadRadians);
+    
+    // Calculate where the turret should point relative to robot forward
+    double desiredTurretAngle = tagYawDegrees + leadDegrees;
+    
+    // The difference is our offset from the tag
+    double turretYawRelativeToTag = desiredTurretAngle - tagYawDegrees;
+    
+    return turretYawRelativeToTag;
 }
 
 
     double voltage;
 
     double aimOutput;
-
-    public Command testTrack() {
-        return run(() -> {
-                aimOutput = aimController.calculate(vision.getTurretTX(),0);
-                setAngle = setAngle - aimOutput;
-        });
-    }
 
     public Command track() {
         return run(() -> {

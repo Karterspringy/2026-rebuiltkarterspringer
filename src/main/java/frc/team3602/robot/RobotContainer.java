@@ -23,6 +23,7 @@ import frc.team3602.robot.Vision;
 import frc.team3602.robot.generated.TunerConstants;
 import frc.team3602.robot.subsystems.CommandSwerveDrivetrain;
 import frc.team3602.robot.subsystems.IntakeSubsystem;
+import frc.team3602.robot.subsystems.PivotSubsystem;
 import frc.team3602.robot.subsystems.ShooterSubsystem;
 import frc.team3602.robot.subsystems.SpindexerSubsystem;
 import frc.team3602.robot.subsystems.TurretSubsystem;
@@ -54,14 +55,15 @@ public class RobotContainer {
     public final ShooterSubsystem shooter = new ShooterSubsystem(vision);
     public final TurretSubsystem turret = new TurretSubsystem(drivetrain);
     public final SpindexerSubsystem spindexer = new SpindexerSubsystem();
-    public final Superstructure superStructure = new Superstructure(intake, shooter, spindexer, turret, drivetrain);
+    public final PivotSubsystem pivot = new PivotSubsystem();
+    public final Superstructure superStructure = new Superstructure(intake, shooter, spindexer, turret, drivetrain, pivot);
 
-    private Boolean intakeUp = (intake.getPivotEncoder < 0);
-    private Boolean intakeDown = (intake.getPivotEncoder > 90);
+    private Boolean intakeUp = (pivot.getPivotEncoder < 0);
+    private Boolean intakeDown = (pivot.getPivotEncoder > 90);
 
     public RobotContainer() {
         turret.setDefaultCommand(turret.track());
-        intake.setDefaultCommand(intake.holdPivot());
+        pivot.setDefaultCommand(pivot.holdPivot());
         configureBindings();
     }
     
@@ -99,9 +101,9 @@ public class RobotContainer {
         //driverController.povDown().whileTrue(turret.testTurret(0));
         driverController.rightBumper().whileTrue(turret.turretAlignment());
         // driverController.y().whileTrue(shooter.setShootSpeed()).whileFalse(shooter.stopShooter());
-        operatorController.povDown().whileTrue(intake.dropIntake());
-        operatorController.povUp().whileTrue(intake.raiseIntake());
-        operatorController.a().whileTrue(intake.setIntakeSpeed()).onFalse(intake.stopIntake());
+        operatorController.povDown().whileTrue(superStructure.IntakeBall());
+        operatorController.povUp().whileTrue(superStructure.StopIntake());
+        // operatorController.a().whileTrue(intake.setIntakeSpeed()).onFalse(intake.stopIntake());
         // driverController.x().whileTrue(spindexer.setSpindexerReceive()).whileFalse(spindexer.stopSpindexer());
         // driverController.povUp().whileTrue(spindexer.setFasterSpindexerReceive()).whileFalse(spindexer.stopSpindexer());
 
