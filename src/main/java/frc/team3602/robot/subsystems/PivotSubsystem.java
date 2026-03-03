@@ -18,11 +18,13 @@ public class PivotSubsystem extends SubsystemBase {
     public double getPivotEncoder;
     private double pivotSetPoint = 0;
 
+    private double offset = 109;
+
     public PivotSubsystem() {
         intakePivot.setPosition(0);
         intakePivotFollow.setPosition(0);
 
-         var motorConfig = new MotorOutputConfigs();
+        var motorConfig = new MotorOutputConfigs();
 
         var limitConfig = new CurrentLimitsConfigs();
 
@@ -35,32 +37,45 @@ public class PivotSubsystem extends SubsystemBase {
         intakePivotFollow.getConfigurator().apply(motorConfig);
         intakePivotFollow.getConfigurator().apply(limitConfig);
 
-
     }
 
-    //Controllers
-    private final PIDController pivotPID = new PIDController(0.15, 0.0,0.0);
-    private final PIDController pivotFollowerPID = new PIDController(0.15,0.0, 0.0);
-    //Commands
+    // Controllers
+    private final PIDController pivotPID = new PIDController(0.15, 0.0, 0.0);
+    private final PIDController pivotFollowerPID = new PIDController(0.15, 0.0, 0.0);
+    // Commands
 
     public Double getRightPosition() {
-        return (intakePivot.getRotorPosition().getValueAsDouble() / 125) * 360; // every revolution is 0.125 degrees because it is  125 to 1 gear ratio                                                         // a 30:1 gear ratio 10:1 from gear, 3:1 from gear box
+        return (intakePivot.getRotorPosition().getValueAsDouble() / 125) * 360; // every revolution is 0.125 degrees
+                                                                                // because it is 125 to 1 gear ratio //
+                                                                                // a 30:1 gear ratio 10:1 from gear, 3:1
+                                                                                // from gear box
     }
+
     public Double getLeftPosition() {
-        return -(intakePivotFollow.getRotorPosition().getValueAsDouble() / 125) * 360; // every revolution is 0.125 degrees because it is  125 to 1 gear ratio                                                         // a 30:1 gear ratio 10:1 from gear, 3:1 from gear box
+        return -(intakePivotFollow.getRotorPosition().getValueAsDouble() / 125) * 360; // every revolution is 0.125
+                                                                                       // degrees because it is 125 to 1
+                                                                                       // gear ratio // a 30:1 gear
+                                                                                       // ratio 10:1 from gear, 3:1 from
+                                                                                       // gear box
     }
 
-         public Command dropIntake() {
-        return run(() ->
-         pivotSetPoint = 109
-        );
-     }
+    public Command smartRaisePivot() {
+        return runOnce(() -> pivotSetPoint = pivotSetPoint - offset
 
-     public Command raiseIntake() {
-        return runOnce(() ->
-         pivotSetPoint = 0
         );
-     }
+    }
+
+    public Command smartDropPivot() {
+        return runOnce(() -> pivotSetPoint = pivotSetPoint + offset);
+    }
+
+    public Command dumbDropIntake() {
+        return run(() -> pivotSetPoint = 109);
+    }
+
+    public Command dumbRaiseIntake() {
+        return runOnce(() -> pivotSetPoint = 0);
+    }
 
     public Boolean isRightDown() {
         return (getPivotEncoder > 90);
@@ -71,33 +86,30 @@ public class PivotSubsystem extends SubsystemBase {
     }
 
     public Command runRightPivot(double power) {
-        return runOnce(() ->
-        intakePivot.setVoltage(power));
+        return runOnce(() -> intakePivot.setVoltage(power));
     }
 
     public Command runLeftPivot(double power) {
-        return runOnce(() ->
-        intakePivotFollow.setVoltage(power));
+        return runOnce(() -> intakePivotFollow.setVoltage(power));
     }
 
-    //Execute PIDs in default command
+    // Execute PIDs in default command
     public Command holdPivot() {
-        return run (() -> {
-            intakePivot.setVoltage(pivotPID.calculate(getRightPosition(),pivotSetPoint));
-            intakePivotFollow.setVoltage(-pivotFollowerPID.calculate(getLeftPosition(),pivotSetPoint));
-        }
-        );
+        return run(() -> {
+            intakePivot.setVoltage(pivotPID.calculate(getRightPosition(), pivotSetPoint));
+            intakePivotFollow.setVoltage(-pivotFollowerPID.calculate(getLeftPosition(), pivotSetPoint));
+        });
     }
 
     @Override
     public void periodic() {
         getPivotEncoder = getRightPosition();
 
-        SmartDashboard.putNumber("Inake Angle",getRightPosition());
+        SmartDashboard.putNumber("Inake Angle", getRightPosition());
         SmartDashboard.putBoolean("Intake Boolean", isRightDown());
         SmartDashboard.putNumber("Pivot Setpoint", pivotSetPoint);
         SmartDashboard.putNumber("Pivot Voltage", intakePivot.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("Pivot Follower Voltage", intakePivotFollow.getMotorVoltage().getValueAsDouble());
     }
-    
+
 }

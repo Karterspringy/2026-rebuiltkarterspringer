@@ -110,8 +110,8 @@ public class RobotContainer {
         //driverController.povDown().whileTrue(turret.testTurret(0));
         driverController.rightBumper().whileTrue(turret.turretAlignment());
         // driverController.y().whileTrue(shooter.setShootSpeed()).whileFalse(shooter.stopShooter());
-        operatorController.povDown().whileTrue(superStructure.IntakeBall());
-        operatorController.povUp().whileTrue(superStructure.StopIntake());
+        operatorController.povDown().whileTrue(superStructure.intakeBall());
+        operatorController.povUp().whileTrue(superStructure.stopIntake());
         operatorController.b().whileTrue(shooter.setShootVelocity(-62)).onFalse(shooter.stopShooter());
         // operatorController.a().whileTrue(intake.setIntakeSpeed()).onFalse(intake.stopIntake());
         // driverController.x().whileTrue(spindexer.setSpindexerReceive()).whileFalse(spindexer.stopSpindexer());

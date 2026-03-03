@@ -67,15 +67,15 @@ public class Superstructure {
     }
 
     // Intake
-    public Command IntakeBall() {
-        return pivotSubsys.dropIntake().alongWith(intakeSubsys.setIntakeSpeed().withTimeout(0.2));
+    public Command intakeBall() {
+        return pivotSubsys.smartDropPivot().alongWith(intakeSubsys.setIntakeSpeed().withTimeout(0.2));
     }
 
-    public Command StopIntake() {
-        return pivotSubsys.raiseIntake().alongWith(intakeSubsys.stopIntake());
+    public Command stopIntake() {
+        return pivotSubsys.smartRaisePivot().alongWith(intakeSubsys.stopIntake());
     }
 
-    public Command OutakeBall() {
+    public Command outakeBall() {
         return intakeSubsys.reverseIntake().withTimeout(.2);
     }
 

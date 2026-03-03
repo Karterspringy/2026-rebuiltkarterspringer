@@ -125,7 +125,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
         // set Motion Magic Velocity settings
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicAcceleration = 400; // Target acceleration of 400 rps/s (0.25 seconds to max)
+        motionMagicConfigs.MotionMagicAcceleration = 600; // Target acceleration of 400 rps/s (0.25 seconds to max)
         motionMagicConfigs.MotionMagicJerk = 6000; // Targ  et jerk of 4000 rps/s/s (0.1 seconds)
 
         shootermotor1.getConfigurator().apply(talonFXConfigs);
