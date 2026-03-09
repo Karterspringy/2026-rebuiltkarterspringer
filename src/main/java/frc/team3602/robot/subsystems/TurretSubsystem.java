@@ -16,6 +16,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -125,6 +126,25 @@ public Translation2d getTargetPose() {
     return new Translation2d(0.0, 0.0);
 }
 private final Translation2d TARGET = getTargetPose();
+
+public double getDistanceToTarget() {
+
+    // Robot pose from odometry
+    Pose2d robotPose = drivetrainSubsys.getState().Pose;
+
+    // Target field location (meters)
+    Translation2d targetPosition = getTargetPose(); // TODO set correct field coordinates
+
+    // Robot position
+    Translation2d robotPosition = robotPose.getTranslation();
+
+    // Distance between the two
+    double distance = robotPosition.getDistance(targetPosition);
+
+    double distanceFeet = Units.metersToFeet(distance);
+
+    return distanceFeet;
+}
 
 public double getTurretAngleDeg() {
     // Get rotor position in motor rotations
