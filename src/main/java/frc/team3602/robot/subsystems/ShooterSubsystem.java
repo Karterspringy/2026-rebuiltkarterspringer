@@ -28,8 +28,11 @@ import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 
 import frc.team3602.robot.Vision;
 import frc.team3602.robot.Constants.ShooterConstants;
+import frc.team3602.robot.subsystems.CommandSwerveDrivetrain;
 
 public class ShooterSubsystem extends SubsystemBase {
+
+    public CommandSwerveDrivetrain drivetrain;
 
     // Shooter Motors
     private static TalonFX shootermotor1;
@@ -48,10 +51,11 @@ public class ShooterSubsystem extends SubsystemBase {
     // private static TalonFX feedermoter;
 
     // Constructor
-    public ShooterSubsystem(Vision vision) {
+    public ShooterSubsystem(Vision vision, CommandSwerveDrivetrain drivetrain) {
         shootermotor1 = new TalonFX(ShooterConstants.kShooterMotor1ID, "rio");
         shootermotor2 = new TalonFX(ShooterConstants.kShooterMotor2ID, "rio");
         this.vision = vision;
+        this.drivetrain = drivetrain;
         // feedermoter = new TalonFX(ShooterConstants.kFeederMotorID);
         configShooterSubsys();
         SmartDashboard.putNumber("ShootSpeedInput", shootShuffleSpeed);
@@ -129,7 +133,7 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Shooter1 Speed", ShooterConstants.kShooterSpeed);
         // SmartDashboard.putNumber("Shooter2 Speed", ShooterConstants.kShooterSpeed);
         // SmartDashboard.putNumber("Feeder Speed", ShooterConstants.kFeederMotorSpeed);
-        distance = vision.getDistanceToTarget();
+        distance = drivetrain.getDistanceToTarget();
         shootLerpSpeed = shootLerp.get(distance);
         SmartDashboard.putNumber("Lerp Shoot Speed", shootLerpSpeed);
         SmartDashboard.putNumber("Dist in side of shootSubsys", distance / 12);

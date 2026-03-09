@@ -321,6 +321,14 @@ public double calculateTurretOffset() {
         });
     }
 
+    public Command setPosition() {
+        return run(() -> {
+            var pidEffort = turretController.calculate(getTurretAngleDeg(), setAngle);
+
+            turretMotor.setVoltage(pidEffort);
+        });
+    }
+
     double rotationSpeed;
 
     // Calculations

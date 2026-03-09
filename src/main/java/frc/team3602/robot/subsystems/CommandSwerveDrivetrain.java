@@ -24,9 +24,11 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -311,6 +313,43 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             est.pose, est.timestampSeconds,
             VecBuilder.fill(0.4, 0.4, 9999.0)); // trust gyro for heading
     }
+}
+
+public Translation2d getTargetPose() {
+    Optional<Alliance> allianceOpt = DriverStation.getAlliance();
+
+    // Check if an alliance is present
+    if (allianceOpt.isPresent()) {
+        Alliance alliance = allianceOpt.get(); // unwrap the Optional
+
+        if (alliance == Alliance.Blue) {
+            return new Translation2d(0.0, 0.0); // example blue alliance target
+        } else if (alliance == Alliance.Red) {
+            return new Translation2d(1.0, 1.0); // example red alliance target
+        }
+    }
+
+    // Fallback if alliance not present or invalid
+    return new Translation2d(0.0, 0.0);
+}
+
+ public double getDistanceToTarget() {
+
+    // Robot pose from odometry
+    Pose2d robotPose = this.getState().Pose;
+
+    // Target field location (meters)
+    Translation2d targetPosition = this.getTargetPose(); // TODO set correct field coordinates
+
+    // Robot position
+    Translation2d robotPosition = robotPose.getTranslation();
+
+    // Distance between the two
+    double distance = robotPosition.getDistance(targetPosition);
+
+    double distanceFeet = Units.metersToFeet(distance);
+
+    return distanceFeet;
 }
 
     @Override

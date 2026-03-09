@@ -16,7 +16,6 @@ import frc.team3602.robot.subsystems.CommandSwerveDrivetrain;
 
 public class Vision {
     public TurretSubsystem turret;
-    public CommandSwerveDrivetrain drivetrain;
 
     public Vision() {
         int[] validTagID = { 21, 26, 18, 5, 10, 2 };
@@ -70,25 +69,6 @@ public class Vision {
     public double getDist() {
         return distance = (44.21875 - 15.625) / Math.tan(angle);
     }
-
-    public double getDistanceToTarget() {
-
-    // Robot pose from odometry
-    Pose2d robotPose = drivetrain.getState().Pose;
-
-    // Target field location (meters)
-    Translation2d targetPosition = turret.getTargetPose(); // TODO set correct field coordinates
-
-    // Robot position
-    Translation2d robotPosition = robotPose.getTranslation();
-
-    // Distance between the two
-    double distance = robotPosition.getDistance(targetPosition);
-
-    double distanceFeet = Units.metersToFeet(distance);
-
-    return distanceFeet;
-}
 
     public double getPoseY() {
         return LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-primary").pose.getY();

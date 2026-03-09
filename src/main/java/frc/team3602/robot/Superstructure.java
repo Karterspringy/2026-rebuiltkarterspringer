@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.team3602.robot.Constants.ShooterConstants;
 import frc.team3602.robot.Constants.spindexerConstants;
+import frc.team3602.robot.subsystems.ClimberSubsystem;
 import frc.team3602.robot.subsystems.CommandSwerveDrivetrain;
 import frc.team3602.robot.subsystems.IntakeSubsystem;
 import frc.team3602.robot.subsystems.PivotSubsystem;
@@ -28,6 +29,7 @@ public class Superstructure {
     public CommandSwerveDrivetrain commandSwerveDrivetrainsubsys;
     public Vision vision;
     public PivotSubsystem pivotSubsys;
+    public ClimberSubsystem climberSubsys;
 
     public Superstructure(IntakeSubsystem intakeSubsys, ShooterSubsystem shooterSubsys,
             SpindexerSubsystem spindexerSubsys,
@@ -46,11 +48,21 @@ public class Superstructure {
                 turretSubsys.aimCommand(),
                 Commands.sequence(
 
-                        shooterSubsys.setShootVelocity(-62.5).withTimeout(2),
+                        shooterSubsys.setShootVelocity(-62.5).withTimeout(1.7),
                         spindexerSubsys.setFeedVelocity(-62.5)
                 ));
     }
-    
+
+    public Command shootBall2() {
+        return Commands.parallel(
+                turretSubsys.track(),
+                Commands.sequence(
+                        shooterSubsys.setShootVelocity(-57.5).withTimeout(2).andThen(
+                                spindexerSubsys.setFeedVelocity(-57.5))
+
+                ));
+    }
+
     public Command shootFailsafe() {
         return Commands.sequence(
             turretSubsys.setAngle(0),
@@ -79,8 +91,8 @@ public class Superstructure {
         return intakeSubsys.reverseIntake().withTimeout(.2);
     }
 
-   
-   
+
+
     // Shooter
     // public Command ShootBall() {
     // return
