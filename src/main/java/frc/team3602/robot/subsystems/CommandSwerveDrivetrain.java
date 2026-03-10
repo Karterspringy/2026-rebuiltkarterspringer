@@ -22,16 +22,20 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.estimator.PoseEstimator;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -41,6 +45,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.team3602.robot.LimelightHelpers;
 import frc.team3602.robot.Vision;
+import frc.team3602.robot.LimelightHelpers.PoseEstimate;
 import frc.team3602.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -56,6 +61,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.FieldCentric fcDrive = new SwerveRequest.FieldCentric();
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+
+    private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(getKinematics(),
+            getPigeon2().getRotation2d(), this.getState().ModulePositions, Pose2d.kZero, VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
+            VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30)));
 
     public double heading;
     private final ApplyFieldSpeeds autoRequest = new ApplyFieldSpeeds();
@@ -258,14 +267,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return runOnce(() -> {
             turbo = 0.8;
         });
-       
+
     }
 
     public Command setTurbo() {
         return runOnce(() -> {
             turbo = 1.0;
         });
-       
+
     }
 
     /**
@@ -300,69 +309,83 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
     }
 
-
     private void updatePoseFromVision() {
-    for (String cam : new String[]{"limelight-right","limelight-left"}) {
-        var est = LimelightHelpers
-            .getBotPoseEstimate_wpiBlue_MegaTag2(cam);
-        if (est == null || est.tagCount == 0) continue;
-        if (est.pose.getTranslation().getDistance(
-                this.getState().Pose
-                .getTranslation()) > 1.5) continue; // reject teleports
-        this.addVisionMeasurement(
-            est.pose, est.timestampSeconds,
-            VecBuilder.fill(0.4, 0.4, 9999.0)); // trust gyro for heading
-    }
-}
+        LimelightHelpers.SetRobotOrientation("limelight-left",
+                poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.SetRobotOrientation("limelight-right",
+                poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
 
-public Translation2d getTargetPose() {
-    Optional<Alliance> allianceOpt = DriverStation.getAlliance();
+        LimelightHelpers.PoseEstimate megaTagLeft = LimelightHelpers
+                .getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left");
+        LimelightHelpers.PoseEstimate megaTagRight = LimelightHelpers
+                .getBotPoseEstimate_wpiBlue_MegaTag2("limelight-right");
 
-    // Check if an alliance is present
-    if (allianceOpt.isPresent()) {
-        Alliance alliance = allianceOpt.get(); // unwrap the Optional
-
-        if (alliance == Alliance.Blue) {
-            return new Translation2d(0.0, 0.0); // example blue alliance target
-        } else if (alliance == Alliance.Red) {
-            return new Translation2d(1.0, 1.0); // example red alliance target
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
+        if (megaTagLeft!= null) {
+        poseEstimator.addVisionMeasurement(megaTagLeft.pose, megaTagLeft.timestampSeconds);
+        poseEstimator.addVisionMeasurement(megaTagRight.pose, megaTagRight.timestampSeconds);
         }
     }
 
-    // Fallback if alliance not present or invalid
-    return new Translation2d(0.0, 0.0);
-}
+    public Translation2d getTargetPose() {
+        Optional<Alliance> allianceOpt = DriverStation.getAlliance();
 
- public double getDistanceToTarget() {
+        // Check if an alliance is present
+        if (allianceOpt.isPresent()) {
+            Alliance alliance = allianceOpt.get(); // unwrap the Optional
 
-    // Robot pose from odometry
-    Pose2d robotPose = this.getState().Pose;
+            if (alliance == Alliance.Blue) {
+                return new Translation2d(0.0, 0.0); // example blue alliance target
+            } else if (alliance == Alliance.Red) {
+                return new Translation2d(1.0, 1.0); // example red alliance target
+            }
+        }
 
-    // Target field location (meters)
-    Translation2d targetPosition = this.getTargetPose(); // TODO set correct field coordinates
+        // Fallback if alliance not present or invalid
+        return new Translation2d(0.0, 0.0);
+    }
 
-    // Robot position
-    Translation2d robotPosition = robotPose.getTranslation();
+    public double getDistanceToTarget() {
 
-    // Distance between the two
-    double distance = robotPosition.getDistance(targetPosition);
+        // Robot pose from odometry
+        Pose2d robotPose = this.getState().Pose;
 
-    double distanceFeet = Units.metersToFeet(distance);
+        // Target field location (meters)
+        Translation2d targetPosition = this.getTargetPose(); // TODO set correct field coordinates
 
-    return distanceFeet;
-}
+        // Robot position
+        Translation2d robotPosition = robotPose.getTranslation();
+
+        // Distance between the two
+        double distance = robotPosition.getDistance(targetPosition);
+
+        double distanceFeet = Units.metersToFeet(distance);
+
+        return distanceFeet;
+    }
 
     @Override
     public void periodic() {
         double headingDeg = this.getPigeon2().getYaw().getValueAsDouble();
-        double headingRate  = this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble();
+        double headingRate = this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble();
         LimelightHelpers.SetRobotOrientation("limelight-right", headingDeg, headingRate, 0, 0, 0, 0);
         LimelightHelpers.SetRobotOrientation("limelight-left", headingDeg, headingRate, 0, 0, 0, 0);
         updatePoseFromVision();
-        
+        poseEstimator.update(getPigeon2().getRotation2d(), this.getState().ModulePositions);
+        poseEstimator.getEstimatedPosition();
+
         SmartDashboard.putNumber("Rotation Speed", this.rotationSpeed);
         SmartDashboard.putNumber("my heading", vision.getTX());
         SmartDashboard.putNumber("turret angle", turret.getEncoder());
+        SmartDashboard.putNumber("Robot X", this.getState().Pose.getX());
+        SmartDashboard.putNumber("Robot Y", this.getState().Pose.getY());
+        SmartDashboard.putNumber("Robot X", this.getState().Pose.getRotation().getDegrees());
+        
+        var field = new Field2d();
+        field.setRobotPose(poseEstimator.getEstimatedPosition());
+
+        SmartDashboard.putData("PoseVisionAbe", field);
+
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply
